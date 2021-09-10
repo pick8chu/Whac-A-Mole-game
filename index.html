@@ -1,0 +1,321 @@
+<html>
+
+<head>
+    <title>두더지 게임</title>
+    <style>
+        table,
+        th,
+        td {
+            border: 2px solid black;
+        }
+        
+        button {
+            width: 50px;
+            height: 50px;
+        }
+        
+        button:enabled {
+            background-color: darkgoldenrod;
+        }
+        
+        .start {
+            width: 200px;
+            height: 50px;
+            font-size: 30;
+        }
+        
+        .zip {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .score {
+            font-size: 20;
+        }
+        
+        .time {
+            font-size: 20;
+        }
+    </style>
+    <script>
+        const btnArr = Array.from({
+            length: 24
+        }, () => false);
+        var score = 0;
+        var leftTime = "00:00";
+
+        const onClickBtn = (idx) => {
+            if (btnArr[idx] === false) return;
+            buttonOff(idx);
+
+            score += 100;
+            sessionStorage.setItem('curScore', score);
+            displayScore();
+            btnArr[idx] = false;
+        }
+
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
+        }
+
+        function getRandom(min, max) {
+            return Math.random() * (max - min) + min; //The maximum is exclusive and the minimum is inclusive
+        }
+
+        const doable = () => {
+            let ranPoss = getRandomInt(1, 10);
+            if (ranPoss > 4) return false;
+
+            let upCnt = btnArr.reduce((cnt, el) => cnt + el, 0);
+            if (upCnt >= 5) return false;
+            else return true;
+        }
+
+        const buttonOnFlag = () => {
+            if (!doable()) return;
+
+            let upIdxArr = []
+            btnArr.forEach((el, idx) => {
+                if (el) upIdxArr.push(idx);
+            });
+
+            let nextIdx;
+            do {
+                nextIdx = getRandomInt(1, 24);
+            }
+            while (upIdxArr.indexOf(nextIdx) != -1);
+
+            btnArr[nextIdx] = true;
+            buttonOn(nextIdx);
+
+            let timer = getRandom(1, 3) * 100;
+            var interval = setInterval(function() {
+                timer--;
+                if (timer <= 0 || !btnArr[nextIdx]) {
+                    btnArr[nextIdx] = false;
+                    buttonOff(nextIdx);
+                    clearInterval(interval);
+                }
+            }, 10);
+        }
+
+        const buttonOn = (idx) => {
+            document.getElementById("btn" + idx).innerText = "O";
+            document.getElementById("btn" + idx).disabled = false;
+        }
+
+        const buttonOff = (idx) => {
+            document.getElementById("btn" + idx).innerText = "X";
+            document.getElementById("btn" + idx).disabled = true;
+        }
+
+        const displayLeftTime = () => {
+            document.getElementById("leftTime").innerText = leftTime;
+        }
+
+        const displayScore = () => {
+            document.getElementById("score").innerText = score;
+        }
+
+        const onClickStart = (timer) => {
+            sessionStorage.setItem('isItOn', 1);
+            document.getElementById("start").disabled = true;
+
+
+            var interval = setInterval(function() {
+
+                min = parseInt(timer / 100);
+                mili = timer % 100;
+                leftTime = (min / 10 >= 1 ? min : "0" + min) + ":" + (mili / 10 >= 1 ? mili : "0" + mili);
+                timer--;
+                if (timer <= 0) {
+                    clearInterval(interval);
+                    timerTimeout();
+                }
+                displayLeftTime();
+                sessionStorage.setItem('curTime', timer);
+                if ((mili / 10) % 3 == 0) {
+                    buttonOnFlag();
+                }
+
+            }, 10);
+        }
+
+        const init = () => {
+            score = 0;
+            leftTime = "00:00";
+            displayLeftTime();
+            displayScore();
+            for (let i = 1; i <= 24; i++) {
+                btnArr[i] = false;
+                buttonOff(i);
+            }
+        }
+
+        const timerTimeout = () => {
+            document.getElementById("start").disabled = false;
+            window.alert("점수는" + score + "입니다");
+            sessionStorage.setItem('isItOn', 0);
+            init();
+        }
+
+        const onloadFn = () => {
+            let isItOn = Number(sessionStorage.getItem('isItOn'));
+            if (!isItOn) {
+                console.log("noton")
+                return;
+            }
+
+            score = Number(sessionStorage.getItem('curScore'));
+            displayScore();
+            let curTime = sessionStorage.getItem('curTime');
+            onClickStart(curTime);
+        }
+
+        window.onload = (event) => {
+            onloadFn();
+        };
+    </script>
+</head>
+
+<body>
+    <div>
+        <div>
+            <button id="start" class="start" onclick="onClickStart(6000)">시작</button>
+        </div>
+        <div>
+            <span class="score">점수: <b id="score">0</b></span>
+        </div>
+        <div>
+            <span class="time">남은시간: <b id="leftTime">00:00</b></span>
+        </div>
+        <div>
+            <table>
+                <tr>
+                    <td>
+                        <div class="zip"></div>
+                    </td>
+                    <td>
+                        <div class="zip"></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn1" onclick="onClickBtn(1)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn2" onclick="onClickBtn(2)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"></div>
+                    </td>
+                    <td>
+                        <div class="zip"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="zip"></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn3" onclick="onClickBtn(3)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn4" onclick="onClickBtn(4)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn5" onclick="onClickBtn(5)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn6" onclick="onClickBtn(6)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="zip"><button id="btn7" onclick="onClickBtn(7)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn8" onclick="onClickBtn(8)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn9" onclick="onClickBtn(9)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn10" onclick="onClickBtn(10)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn11" onclick="onClickBtn(11)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn12" onclick="onClickBtn(12)" disabled>X</button></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="zip"><button id="btn13" onclick="onClickBtn(13)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn14" onclick="onClickBtn(14)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn15" onclick="onClickBtn(15)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn16" onclick="onClickBtn(16)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn17" onclick="onClickBtn(17)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn18" onclick="onClickBtn(18)" disabled>X</button></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="zip"></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn19" onclick="onClickBtn(19)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn20" onclick="onClickBtn(20)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn21" onclick="onClickBtn(21)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn22" onclick="onClickBtn(22)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="zip"></div>
+                    </td>
+                    <td>
+                        <div class="zip"></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn23" onclick="onClickBtn(23)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"><button id="btn24" onclick="onClickBtn(24)" disabled>X</button></div>
+                    </td>
+                    <td>
+                        <div class="zip"></div>
+                    </td>
+                    <td>
+                        <div class="zip"></div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>
