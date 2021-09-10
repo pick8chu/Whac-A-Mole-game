@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>두더지 게임</title>
+    <title>Whac-A-Mole-game</title>
     <style>
         table,
         th,
@@ -54,14 +54,14 @@
             btnArr[idx] = false;
         }
 
-        function getRandomInt(min, max) {
+        const getRandomInt = (min, max) => {
             min = Math.ceil(min);
             max = Math.floor(max);
-            return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
+            return Math.floor(Math.random() * (max - min) + min);
         }
 
-        function getRandom(min, max) {
-            return Math.random() * (max - min) + min; //The maximum is exclusive and the minimum is inclusive
+        const getRandom = (min, max) => {
+            return Math.random() * (max - min) + min;
         }
 
         const doable = () => {
@@ -73,7 +73,7 @@
             else return true;
         }
 
-        const buttonOnFlag = () => {
+        const randomButtonOn = () => {
             if (!doable()) return;
 
             let upIdxArr = []
@@ -91,7 +91,7 @@
             buttonOn(nextIdx);
 
             let timer = getRandom(1, 3) * 100;
-            var interval = setInterval(function() {
+            let interval = setInterval(() => {
                 timer--;
                 if (timer <= 0 || !btnArr[nextIdx]) {
                     btnArr[nextIdx] = false;
@@ -123,8 +123,7 @@
             sessionStorage.setItem('isItOn', 1);
             document.getElementById("start").disabled = true;
 
-
-            var interval = setInterval(function() {
+            let interval = setInterval(() => {
 
                 min = parseInt(timer / 100);
                 mili = timer % 100;
@@ -137,7 +136,7 @@
                 displayLeftTime();
                 sessionStorage.setItem('curTime', timer);
                 if ((mili / 10) % 3 == 0) {
-                    buttonOnFlag();
+                    randomButtonOn();
                 }
 
             }, 10);
@@ -148,6 +147,10 @@
             leftTime = "00:00";
             displayLeftTime();
             displayScore();
+            sessionStorage.setItem('curScore', 0);
+            sessionStorage.setItem('curTime', 0);
+            sessionStorage.setItem('isItOn', 0);
+
             for (let i = 1; i <= 24; i++) {
                 btnArr[i] = false;
                 buttonOff(i);
@@ -156,15 +159,13 @@
 
         const timerTimeout = () => {
             document.getElementById("start").disabled = false;
-            window.alert("점수는" + score + "입니다");
-            sessionStorage.setItem('isItOn', 0);
+            window.alert("You've made " + score + " points!");
             init();
         }
 
         const onloadFn = () => {
             let isItOn = Number(sessionStorage.getItem('isItOn'));
             if (!isItOn) {
-                console.log("noton")
                 return;
             }
 
@@ -183,13 +184,13 @@
 <body>
     <div>
         <div>
-            <button id="start" class="start" onclick="onClickStart(6000)">시작</button>
+            <button id="start" class="start" onclick="onClickStart(6000)">START</button>
         </div>
         <div>
-            <span class="score">점수: <b id="score">0</b></span>
+            <span class="score">SCORE : <b id="score">0</b></span>
         </div>
         <div>
-            <span class="time">남은시간: <b id="leftTime">00:00</b></span>
+            <span class="time">TIME : <b id="leftTime">00:00</b></span>
         </div>
         <div>
             <table>
